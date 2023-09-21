@@ -1,5 +1,11 @@
 # Changelog
 
+## Version v0.0.6 (2023-09-21)
+
+### Chores and tidying
+
+- use separate access token for Semanticore workflow (#13) (f79fdadf)
+
 ## Version v0.0.5 (2023-09-21)
 
 ### Chores and tidying
