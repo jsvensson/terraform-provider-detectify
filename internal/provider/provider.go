@@ -37,11 +37,11 @@ func (p *DetectifyProvider) Schema(ctx context.Context, req provider.SchemaReque
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"api_key": schema.StringAttribute{
-				MarkdownDescription: "Detectify API key",
+				MarkdownDescription: "Detectify API key.",
 				Required:            true,
 			},
 			"signature": schema.StringAttribute{
-				MarkdownDescription: "Signature for HMAC authentication",
+				MarkdownDescription: "Signature for HMAC authentication. See [API documentation](https://developer.detectify.com/#section/Detectify-API/Authentication) for more information.",
 				Optional:            true,
 			},
 		},

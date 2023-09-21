@@ -49,7 +49,7 @@ func (r *AssetResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 		Attributes: map[string]schema.Attribute{
 			"name": schema.StringAttribute{
 				MarkdownDescription: "The name of the asset, typically a hostname.",
-				Optional:            true,
+				Required:            true,
 			},
 			"defaulted": schema.StringAttribute{
 				MarkdownDescription: "Example configurable attribute with default value",

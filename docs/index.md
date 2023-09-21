@@ -17,8 +17,8 @@ description: |-
 
 ### Required
 
-- `api_key` (String) Detectify API key
+- `api_key` (String) Detectify API key.
 
 ### Optional
 
-- `signature` (String) Signature for HMAC authentication
+- `signature` (String) Signature for HMAC authentication. See [API documentation](https://developer.detectify.com/#section/Detectify-API/Authentication) for more information.
