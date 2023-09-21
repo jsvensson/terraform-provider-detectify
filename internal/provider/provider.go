@@ -11,7 +11,7 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/types"
 )
 
-// Ensure ScaffoldingProvider satisfies various provider interfaces.
+// Ensure DetectifyProvider satisfies various provider interfaces.
 var _ provider.Provider = &DetectifyProvider{}
 
 // DetectifyProvider defines the provider implementation.
