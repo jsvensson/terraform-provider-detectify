@@ -1,5 +1,11 @@
 # Changelog
 
+## Version v0.0.5 (2023-09-21)
+
+### Chores and tidying
+
+- add minimal readme (#11) (a5bed3d4)
+
 ## Version v0.0.4 (2023-09-21)
 
 ### Chores and tidying
