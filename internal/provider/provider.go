@@ -28,6 +28,12 @@ type DetectifyProviderModel struct {
 	Signature types.String `tfsdk:"signature"`
 }
 
+// DetectifyProviderData is used by resources and datasources to complete requests.
+type DetectifyProviderData struct {
+	Client    *http.Client
+	Signature string
+}
+
 func (p *DetectifyProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
 	resp.TypeName = "detectify"
 	resp.Version = p.version
@@ -59,9 +65,6 @@ func (p *DetectifyProvider) Configure(ctx context.Context, req provider.Configur
 	// add authentication headers
 	headers := http.Header{}
 	headers.Set("X-Detectify-Key", data.APIKey.ValueString())
-	if len(data.Signature.ValueString()) > 0 {
-		// TODO: Support HMAC signature
-	}
 
 	// wrap transport for client
 	client := http.DefaultClient
@@ -70,8 +73,13 @@ func (p *DetectifyProvider) Configure(ctx context.Context, req provider.Configur
 		Headers:   headers,
 	}
 
-	resp.DataSourceData = client
-	resp.ResourceData = client
+	providerData := DetectifyProviderData{
+		Client:    client,
+		Signature: data.Signature.ValueString(),
+	}
+
+	resp.DataSourceData = providerData
+	resp.ResourceData = providerData
 }
 
 func (p *DetectifyProvider) Resources(ctx context.Context) []func() resource.Resource {
