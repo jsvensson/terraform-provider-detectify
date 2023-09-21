@@ -17,9 +17,9 @@ Example resource
 
 ### Optional
 
-- `configurable_attribute` (String) Example configurable attribute
 - `defaulted` (String) Example configurable attribute with default value
+- `name` (String) The name of the asset, typically a hostname.
 
 ### Read-Only
 
-- `id` (String) Example identifier
+- `token` (String) The generated asset token.

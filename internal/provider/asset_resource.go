@@ -47,8 +47,8 @@ func (r *AssetResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 		MarkdownDescription: "Example resource",
 
 		Attributes: map[string]schema.Attribute{
-			"configurable_attribute": schema.StringAttribute{
-				MarkdownDescription: "Example configurable attribute",
+			"name": schema.StringAttribute{
+				MarkdownDescription: "The name of the asset, typically a hostname.",
 				Optional:            true,
 			},
 			"defaulted": schema.StringAttribute{
@@ -57,9 +57,9 @@ func (r *AssetResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 				Computed:            true,
 				Default:             stringdefault.StaticString("example value when not configured"),
 			},
-			"id": schema.StringAttribute{
+			"token": schema.StringAttribute{
 				Computed:            true,
-				MarkdownDescription: "Example identifier",
+				MarkdownDescription: "The generated asset token.",
 				PlanModifiers: []planmodifier.String{
 					stringplanmodifier.UseStateForUnknown(),
 				},
@@ -69,7 +69,6 @@ func (r *AssetResource) Schema(ctx context.Context, req resource.SchemaRequest, 
 }
 
 func (r *AssetResource) Configure(ctx context.Context, req resource.ConfigureRequest, resp *resource.ConfigureResponse) {
-	// Prevent panic if the provider has not been configured.
 	if req.ProviderData == nil {
 		return
 	}

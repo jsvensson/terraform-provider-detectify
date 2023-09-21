@@ -21,4 +21,4 @@ description: |-
 
 ### Optional
 
-- `endpoint` (String) Example provider attribute
+- `signature` (String) Signature for HMAC authentication

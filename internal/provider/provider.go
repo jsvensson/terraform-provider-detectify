@@ -24,8 +24,8 @@ type DetectifyProvider struct {
 
 // DetectifyProviderModel describes the provider data model.
 type DetectifyProviderModel struct {
-	Endpoint types.String `tfsdk:"endpoint"`
-	APIKey   types.String `tfsdk:"api:key"`
+	APIKey    types.String `tfsdk:"api_key"`
+	Signature types.String `tfsdk:"signature"`
 }
 
 func (p *DetectifyProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -40,8 +40,8 @@ func (p *DetectifyProvider) Schema(ctx context.Context, req provider.SchemaReque
 				MarkdownDescription: "Detectify API key",
 				Required:            true,
 			},
-			"endpoint": schema.StringAttribute{
-				MarkdownDescription: "Example provider attribute",
+			"signature": schema.StringAttribute{
+				MarkdownDescription: "Signature for HMAC authentication",
 				Optional:            true,
 			},
 		},
@@ -52,16 +52,24 @@ func (p *DetectifyProvider) Configure(ctx context.Context, req provider.Configur
 	var data DetectifyProviderModel
 
 	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
-
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
-	// Configuration values are now available.
-	// if data.Endpoint.IsNull() { /* ... */ }
+	// add authentication headers
+	headers := http.Header{}
+	headers.Set("X-Detectify-Key", data.APIKey.ValueString())
+	if len(data.Signature.ValueString()) > 0 {
+		// TODO: Support HMAC signature
+	}
 
-	// Example client configuration for data sources and resources
+	// wrap transport for client
 	client := http.DefaultClient
+	client.Transport = &transport{
+		Transport: http.DefaultTransport,
+		Headers:   headers,
+	}
+
 	resp.DataSourceData = client
 	resp.ResourceData = client
 }
@@ -84,4 +92,18 @@ func New(version string) func() provider.Provider {
 			version: version,
 		}
 	}
+}
+
+// custom transport with API credentials in headers
+type transport struct {
+	Transport http.RoundTripper
+	Headers   http.Header
+}
+
+func (t *transport) RoundTrip(req *http.Request) (*http.Response, error) {
+	for k, values := range t.Headers {
+		req.Header[k] = values
+	}
+
+	return t.Transport.RoundTrip(req)
 }
