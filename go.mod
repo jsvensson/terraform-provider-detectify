@@ -1,4 +1,4 @@
-module github.com/jsvensson/detectify-tf
+module github.com/jsvensson/terraform-provider-detectify
 
 go 1.21.1
 
