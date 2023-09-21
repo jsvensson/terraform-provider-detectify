@@ -6,12 +6,12 @@ import (
 	"log"
 
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
-	"github.com/jsvensson/detectify-tf/internal/provider"
+	"github.com/jsvensson/terraform-provider-detectify/internal/provider"
 )
 
 // Run the docs generation tool, check its repository for more information on how it works and how docs
 // can be customized.
-//go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs
+//go:generate go run github.com/hashicorp/terraform-plugin-docs/cmd/tfplugindocs@v0.16.0
 
 var (
 	version = "dev"
@@ -26,7 +26,7 @@ func main() {
 	flag.Parse()
 
 	opts := providerserver.ServeOpts{
-		Address: "", // TODO: Use registered provider name here
+		Address: "registry.terraform.io/jsvensson/detectify",
 		Debug:   debug,
 	}
 
