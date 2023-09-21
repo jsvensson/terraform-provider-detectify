@@ -1,5 +1,15 @@
 # Changelog
 
+## Version v0.0.4 (2023-09-21)
+
+### Chores and tidying
+
+- more initial setup (#10) (2c325e10)
+
+### Other
+
+- Use GoReleaser config from scaffold example (#8) (5dcbea31)
+
 ## Version v0.0.3 (2023-09-21)
 
 ### Chores and tidying
