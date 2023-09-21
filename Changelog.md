@@ -1,5 +1,15 @@
 # Changelog
 
+## Version v0.0.3 (2023-09-21)
+
+### Chores and tidying
+
+- rename module to match expectations (#5) (b9086016)
+
+### Other
+
+- Reconfigure GoReleaser (#7) (0733e550)
+
 ## Version v0.0.2 (2023-09-21)
 
 ### Fixes
