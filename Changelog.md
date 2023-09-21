@@ -1,5 +1,11 @@
 # Changelog
 
+## Version v0.0.2 (2023-09-21)
+
+### Fixes
+
+- rename goreleaser.yml (#3) (19166075)
+
 ## Version v0.0.1 (2023-09-21)
 
 ### Other
