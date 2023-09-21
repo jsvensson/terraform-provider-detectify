@@ -1,5 +1,11 @@
 # Changelog
 
+## Version v0.0.7 (2023-09-21)
+
+### Tests
+
+- add starting scaffold for provider tests (#16) (43f89e7c)
+
 ## Version v0.0.6 (2023-09-21)
 
 ### Chores and tidying
