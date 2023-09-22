@@ -2,7 +2,13 @@ package provider
 
 import (
 	"context"
+	"crypto/hmac"
+	"crypto/sha256"
+	"encoding/base64"
+	"fmt"
 	"net/http"
+	"strconv"
+	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
@@ -71,6 +77,7 @@ func (p *DetectifyProvider) Configure(ctx context.Context, req provider.Configur
 	client.Transport = &transport{
 		Transport: http.DefaultTransport,
 		Headers:   headers,
+		signature: data.Signature.ValueString(),
 	}
 
 	providerData := DetectifyProviderData{
@@ -106,12 +113,40 @@ func New(version string) func() provider.Provider {
 type transport struct {
 	Transport http.RoundTripper
 	Headers   http.Header
+	apiKey    string
+	secret    string
+	signature string
 }
 
 func (t *transport) RoundTrip(req *http.Request) (*http.Response, error) {
+	if len(t.signature) > 0 {
+		ts := time.Now()
+		signature := CalculateSignature(req, t.apiKey, t.secret, ts)
+
+		t.Headers.Set("X-Detectify-Timestamp", strconv.FormatInt(ts.Unix(), 10))
+		t.Headers.Set("X-Detectify-Signature", signature)
+	}
+
 	for k, values := range t.Headers {
 		req.Header[k] = values
 	}
 
 	return t.Transport.RoundTrip(req)
+}
+
+// Calculate the HMAC signature for the request.
+func CalculateSignature(req *http.Request, apiKey, secretKey string, timestamp time.Time) string {
+	key, err := base64.StdEncoding.DecodeString(secretKey)
+	if err != nil {
+		panic(err)
+	}
+
+	// TODO: Issue with reading body like this?
+
+	value := fmt.Sprintf("%s;%s;%s;%d;%s", req.Method, req.URL.Path, apiKey, timestamp.Unix(), req.Body)
+	fmt.Println(value)
+	mac := hmac.New(sha256.New, key)
+	mac.Write([]byte(value))
+
+	return base64.StdEncoding.EncodeToString(mac.Sum(nil))
 }
