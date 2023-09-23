@@ -17,8 +17,8 @@ description: |-
 
 ### Required
 
-- `api_key` (String) Detectify API key.
+- `api_key` (String, Sensitive) Detectify API key. May also be provided via `DETECTIFY_API_KEY` environment variable.
 
 ### Optional
 
-- `signature` (String) Signature for HMAC authentication. See [API documentation](https://developer.detectify.com/#section/Detectify-API/Authentication) for more information.
+- `secret` (String, Sensitive) Secret used for HMAC signature. May also be provided via `DETECTIFY_SECRET` environment variable. See [API documentation](https://developer.detectify.com/#section/Detectify-API/Authentication) for more information.

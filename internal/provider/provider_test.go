@@ -8,7 +8,9 @@ import (
 	"github.com/hashicorp/terraform-plugin-framework/providerserver"
 	"github.com/hashicorp/terraform-plugin-go/tfprotov6"
 	"github.com/jsvensson/terraform-provider-detectify/internal/provider"
+	loader "github.com/peteole/testdata-loader"
 	"github.com/stretchr/testify/require"
+	"github.com/stretchr/testify/suite"
 )
 
 // testAccProtoV6ProviderFactories are used to instantiate a provider during
@@ -17,6 +19,19 @@ import (
 // reattach.
 var testAccProtoV6ProviderFactories = map[string]func() (tfprotov6.ProviderServer, error){
 	"detectify": providerserver.NewProtocol6WithError(provider.New("test")()),
+}
+
+type ProviderTestSuite struct {
+	suite.Suite
+	providerConfig string
+}
+
+func (suite *ProviderTestSuite) SetupTest() {
+	suite.providerConfig = string(loader.GetTestFile("testdata/provider.tf"))
+}
+
+func TestProvider(t *testing.T) {
+	suite.Run(t, new(ProviderTestSuite))
 }
 
 func testProviderPreCheck(t *testing.T) {

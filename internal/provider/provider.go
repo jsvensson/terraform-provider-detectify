@@ -7,14 +7,17 @@ import (
 	"encoding/base64"
 	"fmt"
 	"net/http"
+	"os"
 	"strconv"
 	"time"
 
 	"github.com/hashicorp/terraform-plugin-framework/datasource"
+	"github.com/hashicorp/terraform-plugin-framework/path"
 	"github.com/hashicorp/terraform-plugin-framework/provider"
 	"github.com/hashicorp/terraform-plugin-framework/provider/schema"
 	"github.com/hashicorp/terraform-plugin-framework/resource"
 	"github.com/hashicorp/terraform-plugin-framework/types"
+	"github.com/hashicorp/terraform-plugin-log/tflog"
 )
 
 // Ensure DetectifyProvider satisfies various provider interfaces.
@@ -30,14 +33,14 @@ type DetectifyProvider struct {
 
 // DetectifyProviderModel describes the provider data model.
 type DetectifyProviderModel struct {
-	APIKey    types.String `tfsdk:"api_key"`
-	Signature types.String `tfsdk:"signature"`
+	APIKey types.String `tfsdk:"api_key"`
+	Secret types.String `tfsdk:"secret"`
 }
 
 // DetectifyProviderData is used by resources and datasources to complete requests.
 type DetectifyProviderData struct {
-	Client    *http.Client
-	Signature string
+	Client *http.Client
+	Secret string
 }
 
 func (p *DetectifyProvider) Metadata(ctx context.Context, req provider.MetadataRequest, resp *provider.MetadataResponse) {
@@ -49,52 +52,116 @@ func (p *DetectifyProvider) Schema(ctx context.Context, req provider.SchemaReque
 	resp.Schema = schema.Schema{
 		Attributes: map[string]schema.Attribute{
 			"api_key": schema.StringAttribute{
-				MarkdownDescription: "Detectify API key.",
+				MarkdownDescription: "Detectify API key. May also be provided via `DETECTIFY_API_KEY` environment variable.",
 				Required:            true,
+				Sensitive:           true,
 			},
-			"signature": schema.StringAttribute{
-				MarkdownDescription: "Signature for HMAC authentication. See [API documentation](https://developer.detectify.com/#section/Detectify-API/Authentication) for more information.",
-				Optional:            true,
+			"secret": schema.StringAttribute{
+				MarkdownDescription: "Secret used for HMAC signature. May also be provided via `DETECTIFY_SECRET` environment variable. " +
+					"See [API documentation](https://developer.detectify.com/#section/Detectify-API/Authentication) for more information.",
+				Optional:  true,
+				Sensitive: true,
 			},
 		},
 	}
 }
 
 func (p *DetectifyProvider) Configure(ctx context.Context, req provider.ConfigureRequest, resp *provider.ConfigureResponse) {
-	var data DetectifyProviderModel
+	tflog.Info(ctx, "Configuring Detectify provider")
 
-	resp.Diagnostics.Append(req.Config.Get(ctx, &data)...)
+	var config DetectifyProviderModel
+	diags := req.Config.Get(ctx, &config)
+	resp.Diagnostics.Append(diags...)
 	if resp.Diagnostics.HasError() {
 		return
 	}
 
+	// If practitioner provided a configuration value for any of the
+	// attributes, it must be a known value.
+	if config.APIKey.IsUnknown() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("api_key"),
+			"Unknown Detectify API key",
+			"", // TODO: error message that makes sense
+		)
+	}
+
+	if config.Secret.IsUnknown() {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("secret"),
+			"Unknown Detectify secret",
+			"", // TODO: error message that makes sense
+		)
+	}
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	// Read configuration default values from environment,
+	// overriding with Terraform configuration values if set.
+	apiKey := os.Getenv("DETECTIFY_API_KEY")
+	secret := os.Getenv("DETECTIFY_SECRET")
+
+	if !config.APIKey.IsNull() {
+		apiKey = config.APIKey.ValueString()
+	}
+
+	if !config.Secret.IsNull() {
+		secret = config.Secret.ValueString()
+	}
+
+	// If any expected configuration is missing, add errors with instructions.
+	if len(apiKey) == 0 {
+		resp.Diagnostics.AddAttributeError(
+			path.Root("api_key"),
+			"Missing Detectify API key",
+			"The provider cannot create the Detectify API client as there is a missing or empty value for the Detectify API key. "+
+				"Set the API key value in the configuration or use the DETECTIFY_API_KEY environment variable. "+
+				"If either is already set, ensure the value is not empty.",
+		)
+	}
+
+	if resp.Diagnostics.HasError() {
+		return
+	}
+
+	ctx = tflog.SetField(ctx, "api_key", apiKey)
+	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "api_key")
+	ctx = tflog.SetField(ctx, "secret", secret)
+	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "secret")
+
 	// add authentication headers
 	headers := http.Header{}
-	headers.Set("X-Detectify-Key", data.APIKey.ValueString())
+	headers.Set("X-Detectify-Key", apiKey)
 
 	// wrap transport for client
 	client := http.DefaultClient
 	client.Transport = &transport{
 		Transport: http.DefaultTransport,
 		Headers:   headers,
-		signature: data.Signature.ValueString(),
+		signature: config.Secret.ValueString(),
 	}
 
 	providerData := DetectifyProviderData{
-		Client:    client,
-		Signature: data.Signature.ValueString(),
+		Client: client,
+		Secret: config.Secret.ValueString(),
 	}
 
 	resp.DataSourceData = providerData
 	resp.ResourceData = providerData
+
+	tflog.Debug(ctx, "Configured Detectify provider", map[string]any{"success": true})
 }
 
+// Resources defines the resources implemented in the provider.
 func (p *DetectifyProvider) Resources(ctx context.Context) []func() resource.Resource {
 	return []func() resource.Resource{
 		NewAssetResource,
 	}
 }
 
+// DataSources defines the data sources implemented in the provider.
 func (p *DetectifyProvider) DataSources(ctx context.Context) []func() datasource.DataSource {
 	return []func() datasource.DataSource{
 		NewAssetDataSource,
