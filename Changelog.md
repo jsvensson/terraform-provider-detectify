@@ -1,5 +1,11 @@
 # Changelog
 
+## Version v0.0.8 (2023-09-25)
+
+### Chores and tidying
+
+- provider setup (#18) (2fb12a54)
+
 ## Version v0.0.7 (2023-09-21)
 
 ### Tests
