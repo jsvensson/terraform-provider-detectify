@@ -131,15 +131,10 @@ func (p *DetectifyProvider) Configure(ctx context.Context, req provider.Configur
 	ctx = tflog.SetField(ctx, "secret", secret)
 	ctx = tflog.MaskFieldValuesWithFieldKeys(ctx, "secret")
 
-	// add authentication headers
-	headers := http.Header{}
-	headers.Set("X-Detectify-Key", apiKey)
-
 	// wrap transport for client
 	client := http.DefaultClient
 	client.Transport = &transport{
 		Transport: http.DefaultTransport,
-		Headers:   headers,
 		signature: config.Secret.ValueString(),
 	}
 
@@ -186,16 +181,14 @@ type transport struct {
 }
 
 func (t *transport) RoundTrip(req *http.Request) (*http.Response, error) {
+	t.Headers.Set("X-Detectify-Key", t.apiKey)
+
 	if len(t.signature) > 0 {
 		ts := time.Now()
 		signature := CalculateSignature(req, t.apiKey, t.secret, ts)
 
 		t.Headers.Set("X-Detectify-Timestamp", strconv.FormatInt(ts.Unix(), 10))
 		t.Headers.Set("X-Detectify-Signature", signature)
-	}
-
-	for k, values := range t.Headers {
-		req.Header[k] = values
 	}
 
 	return t.Transport.RoundTrip(req)
