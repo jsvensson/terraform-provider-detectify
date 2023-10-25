@@ -1,5 +1,14 @@
 # Changelog
 
+## Version v0.0.9 (2023-10-25)
+
+### Chores and tidying
+
+- **deps:** Bump github.com/hashicorp/terraform-plugin-framework from 1.4.1 to 1.4.2 (#25) (a9b779f9)
+- **deps:** Bump golang.org/x/net from 0.13.0 to 0.17.0 (#24) (d0dd4756)
+- **deps:** bump github.com/hashicorp/terraform-plugin-framework from 1.4.0 to 1.4.1 (#23) (44736571)
+- move API key injection to HTTP transport (#21) (f3ccb6f1)
+
 ## Version v0.0.8 (2023-09-25)
 
 ### Chores and tidying
