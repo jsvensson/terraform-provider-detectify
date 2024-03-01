@@ -7,7 +7,7 @@ require (
 	github.com/hashicorp/terraform-plugin-go v0.21.0
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/peteole/testdata-loader v0.3.0
-	github.com/stretchr/testify v1.8.4
+	github.com/stretchr/testify v1.9.0
 )
 
 require (
