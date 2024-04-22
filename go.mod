@@ -3,7 +3,7 @@ module github.com/jsvensson/terraform-provider-detectify
 go 1.21.1
 
 require (
-	github.com/hashicorp/terraform-plugin-framework v1.5.0
+	github.com/hashicorp/terraform-plugin-framework v1.8.0
 	github.com/hashicorp/terraform-plugin-go v0.22.2
 	github.com/hashicorp/terraform-plugin-log v0.9.0
 	github.com/peteole/testdata-loader v0.3.0
